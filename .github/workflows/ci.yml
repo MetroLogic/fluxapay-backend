@@ -10,6 +10,8 @@ jobs:
   validate:
     name: Lint, Test, and Build
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/fluxapay_test?schema=public"
 
     services:
       postgres:
@@ -50,8 +52,6 @@ jobs:
 
       - name: Run test suite
         run: npm test
-        env:
-          DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/fluxapay_test?schema=public"
 
       - name: Build production bundle
         run: npm run build

@@ -7,6 +7,8 @@ import { configureSecurityHeaders } from './middlewares/securityHeaders';
 import { correlationIdMiddleware, httpLoggerMiddleware } from './middlewares/requestLogger';
 import { globalRateLimiter } from './middlewares/rateLimiter';
 import { healthRouter } from './routes/healthRoutes';
+import { chargeRouter } from './routes/chargeRoutes';
+import { merchantRouter } from './routes/merchantRoutes';
 import { notFoundHandler, globalErrorHandler } from './middlewares/errorHandler';
 
 const app = express();
@@ -29,6 +31,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Health Checks
 app.use('/health', healthRouter);
+
+// Core API Endpoints
+app.use('/api/v1/charges', chargeRouter);
+app.use('/api/v1/merchants', merchantRouter);
 
 // 404 & Global Error Handling
 app.use(notFoundHandler);

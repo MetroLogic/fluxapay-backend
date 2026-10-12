@@ -7,6 +7,7 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
+  transformIgnorePatterns: ['node_modules/(?!(uint8array-extras)/)'],
   moduleFileExtensions: ['ts', 'js', 'json'],
   verbose: true,
   forceExit: true,

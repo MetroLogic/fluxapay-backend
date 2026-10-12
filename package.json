@@ -28,6 +28,7 @@
   "homepage": "https://github.com/MetroLogic/fluxapay-backend#readme",
   "dependencies": {
     "@prisma/client": "^6.19.2",
+    "@stellar/stellar-sdk": "^17.2.1",
     "@types/morgan": "^1.9.10",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",

@@ -19,6 +19,21 @@ enum ApiKeyStatus {
   EXPIRED
 }
 
+enum ChargeStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  EXPIRED
+  SETTLED
+}
+
+enum SettlementStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 model Merchant {
   id               String       @id @default(uuid())
   businessName     String
@@ -34,6 +49,8 @@ model Merchant {
 
   apiKeys          ApiKey[]
   customers        Customer[]
+  charges          Charge[]
+  settlements      Settlement[]
 }
 
 model Customer {
@@ -46,6 +63,8 @@ model Customer {
   metadata    Json?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  charges     Charge[]
 
   @@unique([merchantId, email])
 }
@@ -62,4 +81,44 @@ model ApiKey {
   lastUsedAt  DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+}
+
+model Charge {
+  id               String        @id @default(uuid())
+  merchantId       String
+  merchant         Merchant      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId       String?
+  customer         Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  amountUsdc       Decimal       @db.Decimal(18, 7)
+  amountFiat       Decimal?      @db.Decimal(18, 2)
+  fiatCurrency     String?       @default("USD")
+  stellarPayAddress String
+  stellarMemo      String?
+  txHash           String?       @unique
+  status           ChargeStatus  @default(PENDING)
+  description      String?
+  metadata         Json?
+  expiresAt        DateTime
+  confirmedAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  settlementId     String?
+  settlement       Settlement?   @relation(fields: [settlementId], references: [id], onDelete: SetNull)
+}
+
+model Settlement {
+  id               String            @id @default(uuid())
+  merchantId       String
+  merchant         Merchant          @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  totalUsdc        Decimal           @db.Decimal(18, 7)
+  settledFiatAmount Decimal          @db.Decimal(18, 2)
+  fiatCurrency     String            @default("USD")
+  payoutReference  String?
+  status           SettlementStatus  @default(PENDING)
+  completedAt      DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  charges          Charge[]
 }

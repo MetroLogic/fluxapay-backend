@@ -7,4 +7,5 @@ dist
 coverage
 *.log
 logs/
+src/generated/
 

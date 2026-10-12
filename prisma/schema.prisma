@@ -67,6 +67,8 @@ model Merchant {
   settlements      Settlement[]
   webhooks         Webhook[]
   invoices         Invoice[]
+
+  @@index([email])
 }
 
 model Customer {
@@ -84,6 +86,7 @@ model Customer {
   invoices    Invoice[]
 
   @@unique([merchantId, email])
+  @@index([merchantId])
 }
 
 model ApiKey {
@@ -98,6 +101,8 @@ model ApiKey {
   lastUsedAt  DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  @@index([merchantId, status])
 }
 
 model Charge {
@@ -125,6 +130,10 @@ model Charge {
 
   invoiceId        String?
   invoice          Invoice?      @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId, status])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Settlement {
@@ -141,6 +150,8 @@ model Settlement {
   updatedAt        DateTime          @updatedAt
 
   charges          Charge[]
+
+  @@index([merchantId, status])
 }
 
 model Webhook {
@@ -155,6 +166,8 @@ model Webhook {
   updatedAt   DateTime          @updatedAt
 
   deliveries  WebhookDelivery[]
+
+  @@index([merchantId])
 }
 
 model WebhookDelivery {
@@ -168,6 +181,9 @@ model WebhookDelivery {
   attempts      Int                    @default(1)
   status        WebhookDeliveryStatus  @default(SUCCESS)
   createdAt     DateTime               @default(now())
+
+  @@index([webhookId, status])
+  @@index([createdAt])
 }
 
 model Invoice {
@@ -187,6 +203,8 @@ model Invoice {
 
   items         InvoiceItem[]
   charges       Charge[]
+
+  @@index([merchantId, status])
 }
 
 model InvoiceItem {
@@ -197,4 +215,6 @@ model InvoiceItem {
   quantity    Int      @default(1)
   unitPrice   Decimal  @db.Decimal(18, 7)
   total       Decimal  @db.Decimal(18, 7)
+
+  @@index([invoiceId])
 }

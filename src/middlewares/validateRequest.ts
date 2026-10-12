@@ -15,7 +15,7 @@ export const validateRequest = (schemas: RequestValidationSchema) => {
         req.params = (await schemas.params.parseAsync(req.params)) as Record<string, string>;
       }
       if (schemas.query) {
-        req.query = (await schemas.query.parseAsync(req.query)) as Record<string, unknown>;
+        req.query = (await schemas.query.parseAsync(req.query)) as unknown as Request['query'];
       }
       if (schemas.body) {
         req.body = await schemas.body.parseAsync(req.body);

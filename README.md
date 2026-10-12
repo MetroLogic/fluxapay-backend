@@ -107,9 +107,30 @@ Make stablecoin payments simple, practical, and accessible so merchants can sell
 
 ## Contributing
 
-Contributions are welcome!  
-Open an issue or submit a PR to help build Fluxapay.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on code style, conventional commits, and pull request procedures.
+
+## Backend Architecture & Infrastructure
+
+The backend architecture is built with enterprise security, observability, and scalability in mind:
+
+- **Database Layer**: PostgreSQL managed with Prisma ORM. Models for `Merchant`, `Customer`, `ApiKey`, `Charge`, `Settlement`, `Webhook`, and `Invoice`.
+- **Security & Hardening**:
+  - Helmet HTTP security headers
+  - Strict CORS policy with configurable origin whitelist
+  - Dual Rate Limiting: IP-based sliding window + API key token bucket
+  - Authentication: JWT Bearer authentication for Dashboard + SHA-256 hashed API Keys for merchant endpoints
+- **Observability**:
+  - Structured Winston logging (JSON in production, colorized in development)
+  - Morgan HTTP access logging with UUID correlation IDs (`x-request-id`)
+  - Deep health check endpoint (`/health`) with database connectivity ping, plus Kubernetes `/health/liveness` and `/health/readiness` probes
+- **Graceful Lifecycle**: SIGTERM and SIGINT listeners with HTTP server drain and Prisma database disconnect
+- **Testing & Quality**:
+  - Jest & Supertest test suite (`npm test`)
+  - ESLint & Prettier code enforcement (`npm run lint`, `npm run format`)
+  - Multi-stage production Dockerfile and Docker Compose orchestration
+  - GitHub Actions CI workflow for pull requests and main pushes
 
 ## Telegram link
 
 https://t.me/+m23gN14007w0ZmQ0
+

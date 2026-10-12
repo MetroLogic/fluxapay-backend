@@ -40,6 +40,14 @@ enum WebhookDeliveryStatus {
   RETRYING
 }
 
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  CANCELLED
+  OVERDUE
+}
+
 model Merchant {
   id               String       @id @default(uuid())
   businessName     String
@@ -58,6 +66,7 @@ model Merchant {
   charges          Charge[]
   settlements      Settlement[]
   webhooks         Webhook[]
+  invoices         Invoice[]
 }
 
 model Customer {
@@ -72,6 +81,7 @@ model Customer {
   updatedAt   DateTime  @updatedAt
 
   charges     Charge[]
+  invoices    Invoice[]
 
   @@unique([merchantId, email])
 }
@@ -112,6 +122,9 @@ model Charge {
 
   settlementId     String?
   settlement       Settlement?   @relation(fields: [settlementId], references: [id], onDelete: SetNull)
+
+  invoiceId        String?
+  invoice          Invoice?      @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
 }
 
 model Settlement {
@@ -155,4 +168,33 @@ model WebhookDelivery {
   attempts      Int                    @default(1)
   status        WebhookDeliveryStatus  @default(SUCCESS)
   createdAt     DateTime               @default(now())
+}
+
+model Invoice {
+  id            String         @id @default(uuid())
+  invoiceNumber String         @unique
+  merchantId    String
+  merchant      Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId    String?
+  customer      Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  amountUsdc    Decimal        @db.Decimal(18, 7)
+  status        InvoiceStatus  @default(DRAFT)
+  dueDate       DateTime
+  paymentLink   String?
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  items         InvoiceItem[]
+  charges       Charge[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Decimal  @db.Decimal(18, 7)
+  total       Decimal  @db.Decimal(18, 7)
 }

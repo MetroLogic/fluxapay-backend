@@ -1,15 +1,65 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MERCHANT
+  ADMIN
+  SUPPORT
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+model Merchant {
+  id               String       @id @default(uuid())
+  businessName     String
+  email            String       @unique
+  passwordHash     String
+  role             Role         @default(MERCHANT)
+  walletAddress    String?
+  fiatSettlementCurrency String  @default("USD")
+  bankDetails      Json?
+  isVerified       Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  apiKeys          ApiKey[]
+  customers        Customer[]
+}
+
+model Customer {
+  id          String    @id @default(uuid())
+  merchantId  String
+  merchant    Merchant  @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  email       String
+  name        String?
+  phone       String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([merchantId, email])
+}
+
+model ApiKey {
+  id          String        @id @default(uuid())
+  merchantId  String
+  merchant    Merchant      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  keyHash     String        @unique
+  maskedKey   String
+  name        String        @default("Default Key")
+  status      ApiKeyStatus  @default(ACTIVE)
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
